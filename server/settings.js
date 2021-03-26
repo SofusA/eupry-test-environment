@@ -106,7 +106,7 @@ module.exports = {
     // When httpAdminRoot is used to move the UI to a different root path, the
     // following property can be used to identify a directory of static content
     // that should be served at http://localhost:1880/.
-    httpStatic: '/data/public',
+    // httpStatic: '/data/public',
 
     // The maximum size of HTTP request that will be accepted by the runtime api.
     // Default: 5mb
@@ -142,14 +142,14 @@ module.exports = {
     // See the comment at the top of this file on how to load the `fs` module used by
     // this setting.
     //
-    https: {
-        key: fs.readFileSync('/data/certs/privkey.pem'),
-        cert: fs.readFileSync('/data/certs/fullchain.pem')
-    },
+    // https: {
+    //     key: fs.readFileSync('/data/certs/privkey.pem'),
+    //     cert: fs.readFileSync('/data/certs/fullchain.pem')
+    // },
 
     // The following property can be used to cause insecure HTTP connections to
     // be redirected to HTTPS.
-    requireHttps: true,
+    // requireHttps: true,
 
     // The following property can be used to disable the editor. The admin API
     // is not affected by this option. To disable both the editor and the admin
