@@ -2,7 +2,7 @@ import React from "react";
 import axios from 'axios';
 import { withRouter } from 'react-router';
 
-import { Row, Col, Button, Breadcrumb } from "react-bootstrap"
+import { Row, Col, Button, Breadcrumb, Container } from "react-bootstrap"
 
 import { url } from "../static/url.js"
 
@@ -41,6 +41,7 @@ class App extends React.Component {
       })
       .catch(error => {
         console.log("Error")
+        this.props.history.push("/login/")
       })
     console.log("index.js -> getData(): " + URL)
   }
@@ -58,15 +59,15 @@ class App extends React.Component {
       );
     }
     return (
-      <div>
-        <Breadcrumb>
-          <Breadcrumb.Item active>Locations </Breadcrumb.Item>
-        </Breadcrumb>
+      <Container>
+          <Breadcrumb>
+            <Breadcrumb.Item active>Locations </Breadcrumb.Item>
+          </Breadcrumb>
 
-        <Row className="justify-content-md-center">
-          <Row className="justify-content-md-left">{locationRender}</Row>
-        </Row>
-      </div>
+          <Row className="justify-content-md-center">
+            <Row className="justify-content-md-left">{locationRender}</Row>
+          </Row>
+      </Container>
     )
   }
 }

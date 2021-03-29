@@ -5,10 +5,14 @@ import moment from 'moment';
 import axios from 'axios';
 import { withRouter } from 'react-router';
 
-import { Breadcrumb, Col, Row } from "react-bootstrap"
-import { Button } from "react-bootstrap"
+import { Breadcrumb, Col, Row, Container } from "react-bootstrap"
+// import { Button } from "react-bootstrap"
 
 import DatepickerComponent from "../components/datepicker";
+import Linechart from "../components/linechart";
+import SettingsButton from "../components/settingsButton"
+import AlarmConfig from "../components/alarmConfig"
+
 
 class App extends React.Component {
     state = {
@@ -16,6 +20,7 @@ class App extends React.Component {
             start: moment().hours(0).minutes(0).seconds(0),
             end: moment().hours(0).minutes(0).seconds(0).add(24, 'hours')
         },
+        updater: 0
     }
 
     handleClick = () => {
@@ -28,6 +33,7 @@ class App extends React.Component {
                 ID: localStorage.getItem('ID'),
             }, () => {
                 this.getData();
+
             })
         } else (
             this.props.history.push("/login/")
@@ -48,11 +54,11 @@ class App extends React.Component {
         const retrieveUrls = {
             locName: url + "/api/forward?api=loc/" + loc + "&id=" + this.state.ID,
             proName: url + "/api/forward?api=loc/" + loc + "/pro/" + pro + "&id=" + this.state.ID,
-            alert: url + "/api/forward?api=loc/" + loc + "/pro/" + pro  + "/alert?start=" + this.state.time.start.unix() + "&end=" + this.state.time.end.unix() + "&id=" + this.state.ID,
-            config: url + "/api/forward?api=loc/" + loc + "/pro/" + pro  + "/config?start=" + this.state.time.start.unix() + "&end=" + this.state.time.end.unix() + "&id=" + this.state.ID,
-            status: url + "/api/forward?api=loc/" + loc + "/pro/" + pro  + "/status?start=" + this.state.time.start.unix() + "&end=" + this.state.time.end.unix() + "&id=" + this.state.ID,
-            button: url + "/api/forward?api=loc/" + loc + "/pro/" + pro  + "/button?start=" + this.state.time.start.unix() + "&end=" + this.state.time.end.unix() + "&id=" + this.state.ID,
-            mgraph: url + "/api/forward?api=loc/" + loc + "/pro/" + pro  + "/mgraph?start=" + this.state.time.start.unix() + "&end=" + this.state.time.end.unix() + "&id=" + this.state.ID,
+            alert: url + "/api/forward?api=loc/" + loc + "/pro/" + pro + "/alert?start=" + this.state.time.start.unix() + "&end=" + this.state.time.end.unix() + "&id=" + this.state.ID,
+            config: url + "/api/forward?api=loc/" + loc + "/pro/" + pro + "/config?start=" + this.state.time.start.unix() + "&end=" + this.state.time.end.unix() + "&id=" + this.state.ID,
+            status: url + "/api/forward?api=loc/" + loc + "/pro/" + pro + "/status?start=" + this.state.time.start.unix() + "&end=" + this.state.time.end.unix() + "&id=" + this.state.ID,
+            button: url + "/api/forward?api=loc/" + loc + "/pro/" + pro + "/button?start=" + this.state.time.start.unix() + "&end=" + this.state.time.end.unix() + "&id=" + this.state.ID,
+            mgraph: url + "/api/forward?api=loc/" + loc + "/pro/" + pro + "/mgraph?res=30&start=" + this.state.time.start.unix() + "&end=" + this.state.time.end.unix() + "&id=" + this.state.ID,
         }
 
         for (const key in retrieveUrls) {
@@ -61,13 +67,23 @@ class App extends React.Component {
                     const data = res.data;
                     this.setState({
                         [key]: data
-                    })
+                    }, () => {
+                        if (key === "status") { 
+                            this.nextUpload(data)
+                            for (let shadow of data) {
+                                shadow.type = "normal" //set all as normal by default should be a back-end thing but you know ;) 
+                                console.log(shadow)
+                            }
+                         }
+                    });
+
                 })
                 .catch(error => {
                     console.log(error)
                     this.props.history.push("/login/")
                 });
         }
+
     }
 
     dateHandler = (end, start) => {
@@ -81,24 +97,48 @@ class App extends React.Component {
         })
     }
 
-    // nextUpload = () => {
-    //     let nextupload = Infinity;
+    settingsHandler = (shadow_id, settings) => {
+        let status = this.state.status;
+        let types = Object.keys(settings);
+        let type = "normal";
 
-    //     for (const device of this.state.data.status) {
-    //         if (device.next_update < nextupload) {
-    //             nextupload = device.next_update;
-    //         }
-    //     }
+        for (let thisType of types) {
+            if (settings[thisType]) {
+                type = thisType
+            }
+        }
+        
 
-    //     this.setState({
-    //         nextupload: moment.unix(nextupload).fromNow()
-    //     })
+        for (let i in status) {
+            if (status[i].shadow_id === shadow_id) {
+                status[i].type = type
+            }
+        }
 
-    // }
+        this.setState({
+            status: status,
+            updater: this.state.updater+1
+        })
+    }
+
+    nextUpload = (data) => {
+        let nextupload = Infinity;
+
+        for (const device of data) {
+            if (device.next_update < nextupload) {
+                nextupload = device.next_update;
+            }
+        }
+
+        this.setState({
+            nextupload: moment.unix(nextupload).fromNow()
+        })
+
+    }
 
     render() {
         return (
-            <div>
+            <Container>
                 <Row>
                     <Col>
                         <Breadcrumb>
@@ -115,14 +155,17 @@ class App extends React.Component {
                         <small className="float-sm-right">
                             Next upload {this.state.nextupload}  or <b>on alarm</b>
 
-                            {/* {this.state.loc && this.state.pro && this.state.data ? <SettingsButton loc={this.state.loc} pro={this.state.pro} dataloggers={this.state.data.status} handler={this.settingsHandler} /> : null} */}
+                            {this.state.loc && this.state.pro && this.state.status ? <SettingsButton loc={this.state.loc} pro={this.state.pro} status={this.state.status} handler={this.settingsHandler} /> : null}
+                            {this.state.status ? <AlarmConfig status={this.state.status} /> : null}
 
                         </small>
                     </Col>
                 </Row>
 
-                <Button onClick={this.handleClick}>this.state :) </Button>
-            </div>
+                {this.state.mgraph ? <Linechart mgraph={this.state.mgraph} status={this.state.status} time={this.state.time} updater = {this.state.updater} /> : null}
+
+                {/* <Button onClick={this.handleClick}>Profile.jsx state</Button> */}
+            </Container>
         );
     }
 }
