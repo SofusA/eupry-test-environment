@@ -46,6 +46,26 @@ export default class alarmConfig extends Component {
            
             console.log(postUrl)
 
+            axios.get(retrieveUrls[key])
+                .then(res => {
+                    const data = res.data;
+                    this.setState({
+                        [key]: data
+                    }, () => {
+                        if (key === "status") { 
+                            this.nextUpload(data)
+                            for (let shadow of data) {
+                                shadow.type = "normal" //set all as normal by default should be a back-end thing but you know ;) 
+                            }
+                         }
+                    });
+
+                })
+                .catch(error => {
+                    console.log(error)
+                    this.props.history.push("/login/")
+                });
+
             axios({
                 method: 'get',
                 url: 'postUrl',
