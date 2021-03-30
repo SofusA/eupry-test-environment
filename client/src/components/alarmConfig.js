@@ -1,129 +1,130 @@
 import React, { Component } from 'react'
 import { Button, Popover, OverlayTrigger, Table } from "react-bootstrap"
 import { Bell } from 'react-feather';
+// eslint-disable-next-line
 import axios from 'axios';
-import equal from 'fast-deep-equal';
+import qs from 'qs'
 
+import equal from 'fast-deep-equal/es6/react';
+// eslint-disable-next-line
 import { url } from "../static/url.js"
 
 export default class alarmConfig extends Component {
 
     state = {
-        shadows: {}
     }
 
     componentDidMount() {
         this.loadSettings()
     }
 
-    setSettings = (shadow) => {
-        let checks = { normal: true, CO2: false, diffPressure: false };
-        this.setState({
-            shadows: {
-                ...this.state.shadows,
-                [shadow]: checks
-            }
-        })
-    }
-
     loadSettings = () => {
         for (const shadow of this.props.status) {
-            let getUrl = url + "/api/getsettings?loc=" + this.props.loc + "&pro= " + this.props.pro + "&shadow=" + shadow.shadow_id
-            axios.get(getUrl)
-                .then(res => {
-                    if (res.data.length === 0) {
-                        this.setSettings(shadow.shadow_id)
-                    } else {
-                        const parsedData = JSON.parse(res.data.replaceAll("/", "\""))
-                        // this.props.handler(shadow.shadow_id, parsedData);
-                        this.setState({
-                            shadows: {
-                                ...this.state.shadows,
-                                [shadow.shadow_id]: parsedData
-                            }
-                        })
-                    }
-                })
-                .catch(error => {
-                    console.log(error)
-                });
+            let config = shadow.configuration;
+            config.shadow_id = shadow.shadow_id;
+            config.type = shadow.type;
+            config.device_name = shadow.device_name;
+            this.setState({
+                [shadow.shadow_id]: config
+            })
         }
-
-
-
     }
 
     componentDidUpdate(prevProps) {
         if (!equal(this.props, prevProps)) {
             this.loadSettings()
         }
-
     }
 
-    handleUnitCheckboxes = (shadow_id, type) => {
-        const newCheckState = !this.state.shadows[shadow_id][type];
-        const stateChange = this.state.shadows[shadow_id];
+    setSettings = () => {
+        Object.values(this.state).forEach(shadow => {
+            let postUrl = url + "/api/setconfig/" +
+                this.props.loc +
+                "/" + this.props.pro +
+                "/" + shadow.shadow_id +
+                "/" + this.props.id 
+           
+            console.log(postUrl)
 
-        stateChange[type] = newCheckState;
-
-        let types = Object.keys(stateChange);
-        if (newCheckState === true) {
-            for (let crawlType of types) {
-                if (crawlType !== type) {
-                    stateChange[crawlType] = false;
+            axios({
+                method: 'get',
+                url: 'postUrl',
+                data: qs.stringify({ "l": -0.2, "h": 1.8, "L": -0.3, "H": 2, "sl": 30, "sh": 70, "sL": 28, "sH": 72 }),
+                headers: {
+                    'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
                 }
-            }
-        } else {
-            stateChange.normal = true;
-        }
+            })
 
-        if (type === "normal" && newCheckState === false) {
-            // Do nothhing :) 
-        } else {
-            let getUrl = url + "/api/setin" +
-                "?loc=" + this.props.loc +
-                "&pro=" + this.props.pro +
-                "&shadow=" + shadow_id +
-                "&data=" + JSON.stringify(stateChange);
-
-            axios.get(getUrl)
-                .then(res => {
-                    // this.props.handler(shadow_id, stateChange);
-                    this.setState({
-                        shadows: {
-                            ...this.state.shadows,
-                            [shadow_id]: stateChange
-                        }
-                    })
-                })
-                .catch(error => {
-                    console.log(error)
-                });
-        }
+        });
     }
+
+
+    handleChange = (event) => {
+        const shadow = event.target.attributes.shadow.value;
+        const value = event.target.value;
+        // const unit = event.target.attributes.alarmunit.value;
+        const type = event.target.attributes.alarmtype.value;
+
+        this.setState({
+            [shadow]: {
+                ...this.state[shadow],
+                [type]: value
+            }
+        })
+    }
+
+
 
     handleClick = () => {
         console.log(this.state)
     }
 
-    collectDataloggers = () => {
-        if (this.state.shadows) {
-            return this.props.status.map((datalogger, index) => {
-                return (
-                    <tr key={"alarmconfig" + datalogger.shadow_id}>
-                        <td>{datalogger.device_name}</td>
-                        {!this.state.shadows[datalogger.shadow_id] ? null : <td><input type='checkbox' checked={this.state.shadows[datalogger.shadow_id].normal} id={datalogger.device_name + "_normal"} onChange={event => this.handleUnitCheckboxes(datalogger.shadow_id, "normal")} /></td>}
-                        {!this.state.shadows[datalogger.shadow_id] ? null : <td><input type='checkbox' checked={this.state.shadows[datalogger.shadow_id].CO2} id={datalogger.device_name + "_CO2"} onChange={event => this.handleUnitCheckboxes(datalogger.shadow_id, "CO2")} /></td>}
-                        {!this.state.shadows[datalogger.shadow_id] ? null : <td><input type='checkbox' checked={this.state.shadows[datalogger.shadow_id].diffPressure} id={datalogger.device_name + "_diffPressure"} onChange={event => this.handleUnitCheckboxes(datalogger.shadow_id, "diffPressure")} /></td>}
-                    </tr>
-                )
-            })
-        }
-
-    }
-
 
     render() {
+        const shadows = this.state;
+        const alarmRender = {
+            temp: [],
+            hum: [],
+            CO2: []
+        };
+
+        Object.values(shadows).forEach(shadow => {
+            if (shadow.type === "normal" || shadow.type === "humidity") {
+                alarmRender.temp.push(
+                    <tr key={"alarmconfigTemp" + shadow.shadow_id}>
+                        <td>{shadow.device_name}</td>
+                        <td><input shadow={shadow.shadow_id} alarmunit="temp" alarmtype="crit_high" onChange={this.handleChange} className="alarmInput" type="text" value={this.state[shadow.shadow_id].crit_high} /></td>
+                        <td><input shadow={shadow.shadow_id} alarmunit="temp" alarmtype="high" onChange={this.handleChange} className="alarmInput" type="text" value={this.state[shadow.shadow_id].high} /></td>
+                        <td><input shadow={shadow.shadow_id} alarmunit="temp" alarmtype="crit_low" onChange={this.handleChange} className="alarmInput" type="text" value={this.state[shadow.shadow_id].crit_low} /></td>
+                        <td><input shadow={shadow.shadow_id} alarmunit="temp" alarmtype="low" onChange={this.handleChange} className="alarmInput" type="text" value={this.state[shadow.shadow_id].low} /></td>
+                    </tr>
+                );
+            }
+            if (shadow.type === "humidity" || shadow.type === "CO2") {
+                alarmRender.hum.push(
+                    <tr key={"alarmconfigHum" + shadow.shadow_id}>
+                        <td>{shadow.device_name}</td>
+                        <td><input shadow={shadow.shadow_id} alarmunit="hum" alarmtype="humid_crit_high" onChange={this.handleChange} className="alarmInput" type="text" value={this.state[shadow.shadow_id].humid_crit_high} /></td>
+                        <td><input shadow={shadow.shadow_id} alarmunit="hum" alarmtype="humid_high" onChange={this.handleChange} className="alarmInput" type="text" value={this.state[shadow.shadow_id].humid_high} /></td>
+                        <td><input shadow={shadow.shadow_id} alarmunit="hum" alarmtype="humid_crit_low" onChange={this.handleChange} className="alarmInput" type="text" value={this.state[shadow.shadow_id].humid_crit_low} /></td>
+                        <td><input shadow={shadow.shadow_id} alarmunit="hum" alarmtype="humid_low" onChange={this.handleChange} className="alarmInput" type="text" value={this.state[shadow.shadow_id].humid_low} /></td>
+                    </tr>
+                );
+            }
+            if (shadow.type === "CO2") {
+                alarmRender.CO2.push(
+                    <tr key={"alarmconfigCO2" + shadow.shadow_id}>
+                        <td>{shadow.device_name}</td>
+                        <td><input shadow={shadow.shadow_id} alarmunit="CO2" alarmtype="crit_high" onChange={this.handleChange} className="alarmInput" type="text" value={this.state[shadow.shadow_id].crit_high} /></td>
+                        <td><input shadow={shadow.shadow_id} alarmunit="CO2" alarmtype="high" onChange={this.handleChange} className="alarmInput" type="text" value={this.state[shadow.shadow_id].high} /></td>
+                        <td><input shadow={shadow.shadow_id} alarmunit="CO2" alarmtype="crit_low" onChange={this.handleChange} className="alarmInput" type="text" value={this.state[shadow.shadow_id].crit_low} /></td>
+                        <td><input shadow={shadow.shadow_id} alarmunit="CO2" alarmtype="low" onChange={this.handleChange} className="alarmInput" type="text" value={this.state[shadow.shadow_id].low} /></td>
+                    </tr>
+                );
+            }
+        });
+
+
         const popover = (
             <Popover id="popover-basic" width={400}>
                 <Popover.Title as="h3">Alarm configuration</Popover.Title>
@@ -131,23 +132,10 @@ export default class alarmConfig extends Component {
                     <Table striped className="text-center">
                         <thead>
                             <tr>
-                                <th> </th>
-                                <th>Greyzone duration</th>
-                                <th colspan="4">Temperatur</th>
-                                <th colspan="4">Humidity</th>
-                                <th colspan="4">CO2</th>
+                                <th colSpan="5">Temperatur</th>
                             </tr>
                             <tr>
                                 <td></td>
-                                <td></td>
-                                <td>Critical High</td>
-                                <td>High</td>
-                                <td>Critical Low</td>
-                                <td>Low</td>
-                                <td>Critical High</td>
-                                <td>High</td>
-                                <td>Critical Low</td>
-                                <td>Low</td>
                                 <td>Critical High</td>
                                 <td>High</td>
                                 <td>Critical Low</td>
@@ -155,9 +143,41 @@ export default class alarmConfig extends Component {
                             </tr>
                         </thead>
                         <tbody>
-                            {this.collectDataloggers()}
+                            {alarmRender.temp}
+                        </tbody>
+
+                        <thead>
+                            <tr>
+                                <th colSpan="5">Humidity</th>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Critical High</td>
+                                <td>High</td>
+                                <td>Critical Low</td>
+                                <td>Low</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {alarmRender.hum}
+                        </tbody>
+                        <thead>
+                            <tr>
+                                <th colSpan="5">CO2</th>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Critical High</td>
+                                <td>High</td>
+                                <td>Critical Low</td>
+                                <td>Low</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {alarmRender.CO2}
                         </tbody>
                     </Table>
+                    <Button onClick={this.setSettings}>Submit</Button>
                 </Popover.Content>
             </Popover>
         );
@@ -166,6 +186,7 @@ export default class alarmConfig extends Component {
             <span>
 
                 {/* <Button onClick={this.handleClick}>Settings state</Button> */}
+
 
                 <OverlayTrigger trigger="click" placement="bottom" overlay={popover}>
                     <Button variant="link"><Bell size={18} /></Button>

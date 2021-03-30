@@ -6,7 +6,8 @@ import axios from 'axios';
 import { withRouter } from 'react-router';
 
 import { Breadcrumb, Col, Row, Container } from "react-bootstrap"
-// import { Button } from "react-bootstrap"
+// eslint-disable-next-line
+import { Button } from "react-bootstrap"
 
 import DatepickerComponent from "../components/datepicker";
 import Linechart from "../components/linechart";
@@ -72,7 +73,6 @@ class App extends React.Component {
                             this.nextUpload(data)
                             for (let shadow of data) {
                                 shadow.type = "normal" //set all as normal by default should be a back-end thing but you know ;) 
-                                console.log(shadow)
                             }
                          }
                     });
@@ -156,7 +156,7 @@ class App extends React.Component {
                             Next upload {this.state.nextupload}  or <b>on alarm</b>
 
                             {this.state.loc && this.state.pro && this.state.status ? <SettingsButton loc={this.state.loc} pro={this.state.pro} status={this.state.status} handler={this.settingsHandler} /> : null}
-                            {this.state.status ? <AlarmConfig status={this.state.status} /> : null}
+                            {this.state.status ? <AlarmConfig id={this.state.ID} loc={this.state.loc} pro={this.state.pro} updater = {this.state.updater} status={this.state.status} /> : null}
 
                         </small>
                     </Col>

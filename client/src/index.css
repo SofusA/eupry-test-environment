@@ -31,3 +31,8 @@ body {
 .popover{
   max-width: 100%!important; /* Max Width of the popover (depending on the container!) */
 }
+
+.alarmInput {
+  width: 50px;
+  text-align: center; 
+}
