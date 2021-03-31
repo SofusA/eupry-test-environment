@@ -172,7 +172,7 @@ class App extends React.Component {
                 </Row>
 
                 {this.state.mgraph && this.state.empty !== true ? <Linechart mgraph={this.state.mgraph} status={this.state.status} time={this.state.time} updater = {this.state.updater} /> : "No connected data logger in rofile"}
-                <Button onClick={this.handleClick}>Profile.jsx state</Button>
+                {/* <Button onClick={this.handleClick}>Profile.jsx state</Button> */}
             </Container>
         );
     }
