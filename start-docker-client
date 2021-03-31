@@ -1,0 +1,2 @@
+#! /bin/bash
+sudo docker run -it -p 80:80 -v `pwd`/client/build:/data --name node sofusa/eupry-node serve -p 80 /data
