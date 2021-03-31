@@ -38,42 +38,41 @@ export default class alarmConfig extends Component {
 
     setSettings = () => {
         Object.values(this.state).forEach(shadow => {
-            let postUrl = url + "/api/setconfig/" +
+            let getUrl = url + "/api/setconfig/" +
                 this.props.loc +
                 "/" + this.props.pro +
                 "/" + shadow.shadow_id +
-                "/" + this.props.id 
-           
-            console.log(postUrl)
+                "/" + this.props.id
 
-            axios.get(retrieveUrls[key])
+            // axios.get({
+            //     getUrl,
+            //     headers: { 'content-type': 'application/x-www-form-urlencoded;charset=utf-8' },
+            //     data: qs.stringify({ "l": -0.2, "h": 1.8, "L": -0.3, "H": 2, "sl": 30, "sh": 70, "sL": 28, "sH": 72 }),
+            //     })
+            //     .then(res => {
+            //         const data = res.data;
+            //     })
+            //     .catch(error => {
+            //         console.log(error)
+            //         this.props.history.push("/login/")
+            //     });
+
+            axios({
+                method: 'post',
+                url: getUrl,
+                data: qs.stringify(shadow),
+                headers: {
+                    'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+                }
+            })
                 .then(res => {
                     const data = res.data;
-                    this.setState({
-                        [key]: data
-                    }, () => {
-                        if (key === "status") { 
-                            this.nextUpload(data)
-                            for (let shadow of data) {
-                                shadow.type = "normal" //set all as normal by default should be a back-end thing but you know ;) 
-                            }
-                         }
-                    });
-
+                    console.log(data)
                 })
                 .catch(error => {
                     console.log(error)
                     this.props.history.push("/login/")
                 });
-
-            axios({
-                method: 'get',
-                url: 'postUrl',
-                data: qs.stringify({ "l": -0.2, "h": 1.8, "L": -0.3, "H": 2, "sl": 30, "sh": 70, "sL": 28, "sH": 72 }),
-                headers: {
-                    'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
-                }
-            })
 
         });
     }

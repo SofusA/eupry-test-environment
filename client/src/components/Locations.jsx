@@ -43,7 +43,6 @@ class App extends React.Component {
         console.log("Error")
         this.props.history.push("/login/")
       })
-    console.log("index.js -> getData(): " + URL)
   }
 
   render() {

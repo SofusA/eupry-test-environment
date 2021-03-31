@@ -50,7 +50,7 @@ module.exports = {
     //httpRequestTimeout: 120000,
 
     // The maximum length, in characters, of any message sent to the debug sidebar tab
-    debugMaxLength: 1000,
+    debugMaxLength: 2000,
 
     // The maximum number of messages nodes will buffer internally as part of their
     // operation. This applies across a range of nodes that operate on message sequences.

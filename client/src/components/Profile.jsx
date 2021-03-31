@@ -69,7 +69,7 @@ class App extends React.Component {
                     this.setState({
                         [key]: data
                     }, () => {
-                        if (key === "status") { 
+                        if (key === "status") {
                             this.nextUpload(data)
                             for (let shadow of data) {
                                 shadow.type = "normal" //set all as normal by default should be a back-end thing but you know ;) 
@@ -164,7 +164,7 @@ class App extends React.Component {
 
                 {this.state.mgraph ? <Linechart mgraph={this.state.mgraph} status={this.state.status} time={this.state.time} updater = {this.state.updater} /> : null}
 
-                {/* <Button onClick={this.handleClick}>Profile.jsx state</Button> */}
+                <Button onClick={this.handleClick}>Profile.jsx state</Button>
             </Container>
         );
     }
