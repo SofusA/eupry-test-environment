@@ -46,7 +46,6 @@ class App extends React.Component {
         this.props.history.push("/login/")
       }
       );
-    console.log("location.js -> getData(): " + profileURL)
 
     axios.get(locationURL)
       .then(res => {
@@ -57,7 +56,6 @@ class App extends React.Component {
       .catch(error => {
         console.log(error)
       });
-    console.log("location.js -> getData(): " + locationURL)
   }
 
   handleClick = () => {

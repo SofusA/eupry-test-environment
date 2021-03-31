@@ -21,7 +21,8 @@ class App extends React.Component {
             start: moment().hours(0).minutes(0).seconds(0),
             end: moment().hours(0).minutes(0).seconds(0).add(24, 'hours')
         },
-        updater: 0
+        updater: 0,
+        empty: true
     }
 
     handleClick = () => {
@@ -48,6 +49,7 @@ class App extends React.Component {
         let pro = query.split("&")[1].split("=")[1];
 
         this.setState({
+            updater: this.state.updater+1,
             loc: loc,
             pro: pro
         });
@@ -73,6 +75,13 @@ class App extends React.Component {
                             this.nextUpload(data)
                             for (let shadow of data) {
                                 shadow.type = "normal" //set all as normal by default should be a back-end thing but you know ;) 
+                            }
+
+                            if (data.length > 0) {
+                                this.setState({
+                                    updater: this.state.updater+1,
+                                    empty: false
+                                })
                             }
                          }
                     });
@@ -117,7 +126,7 @@ class App extends React.Component {
 
         this.setState({
             status: status,
-            updater: this.state.updater+1
+            updater: this.state.updater+1,
         })
     }
 
@@ -162,8 +171,7 @@ class App extends React.Component {
                     </Col>
                 </Row>
 
-                {this.state.mgraph ? <Linechart mgraph={this.state.mgraph} status={this.state.status} time={this.state.time} updater = {this.state.updater} /> : null}
-
+                {this.state.mgraph && this.state.empty !== true ? <Linechart mgraph={this.state.mgraph} status={this.state.status} time={this.state.time} updater = {this.state.updater} /> : "No connected data logger in rofile"}
                 <Button onClick={this.handleClick}>Profile.jsx state</Button>
             </Container>
         );

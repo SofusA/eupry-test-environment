@@ -19,15 +19,23 @@ export default class alarmConfig extends Component {
     }
 
     loadSettings = () => {
+        let types = [];
         for (const shadow of this.props.status) {
             let config = shadow.configuration;
             config.shadow_id = shadow.shadow_id;
+
             config.type = shadow.type;
+
             config.device_name = shadow.device_name;
+            types.push(shadow.type)
             this.setState({
-                [shadow.shadow_id]: config
+                [shadow.shadow_id]: config,
             })
         }
+
+        this.setState({
+            types: types
+        })
     }
 
     componentDidUpdate(prevProps) {
@@ -43,19 +51,6 @@ export default class alarmConfig extends Component {
                 "/" + this.props.pro +
                 "/" + shadow.shadow_id +
                 "/" + this.props.id
-
-            // axios.get({
-            //     getUrl,
-            //     headers: { 'content-type': 'application/x-www-form-urlencoded;charset=utf-8' },
-            //     data: qs.stringify({ "l": -0.2, "h": 1.8, "L": -0.3, "H": 2, "sl": 30, "sh": 70, "sL": 28, "sH": 72 }),
-            //     })
-            //     .then(res => {
-            //         const data = res.data;
-            //     })
-            //     .catch(error => {
-            //         console.log(error)
-            //         this.props.history.push("/login/")
-            //     });
 
             axios({
                 method: 'post',
@@ -165,7 +160,7 @@ export default class alarmConfig extends Component {
                             {alarmRender.temp}
                         </tbody>
 
-                        <thead>
+                        <thead className={this.state.types && this.state.types.includes("humidity") ? null : 'hidden'}> 
                             <tr>
                                 <th colSpan="5">Humidity</th>
                             </tr>
@@ -180,7 +175,7 @@ export default class alarmConfig extends Component {
                         <tbody>
                             {alarmRender.hum}
                         </tbody>
-                        <thead>
+                        <thead className={this.state.types && this.state.types.includes("CO2") ? null : 'hidden'}>
                             <tr>
                                 <th colSpan="5">CO2</th>
                             </tr>

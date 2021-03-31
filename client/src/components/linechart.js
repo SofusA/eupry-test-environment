@@ -95,7 +95,7 @@ class App extends React.Component {
         }
 
         // now sort based on settings
-        let sortedSeries = { normal: [], CO2: [], diffPressure: [], humidity: [] };
+        let sortedSeries = { normal: [], CO2: [], humidity: [] };
         if (this.props.status) {
             for (const shadow of this.props.status) {
                 if (shadow.type === "normal") {
@@ -106,6 +106,21 @@ class App extends React.Component {
                             }
                             if (serie.source === "external") {
                                 sortedSeries.normal.push(serie)
+                            }
+                            if (serie.source === "humidity") {
+                                sortedSeries.humidity.push(serie)
+                            }
+                        }
+                    }
+                }
+                if (shadow.type === "humidity") {
+                    for (const serie of series) {
+                        if (shadow.shadow_id === serie.shadow_id) {
+                            if (serie.source === "temperature") {
+                                sortedSeries.normal.push(serie)
+                            }
+                            if (serie.source === "external") {
+                                sortedSeries.humidity.push(serie)
                             }
                             if (serie.source === "humidity") {
                                 sortedSeries.humidity.push(serie)
@@ -125,13 +140,6 @@ class App extends React.Component {
                             if (serie.source === "humidity") {
                                 sortedSeries.humidity.push(serie)
                             }
-                        }
-                    }
-                }
-                if (shadow.type === "diffPressure") {
-                    for (const serie of series) {
-                        if (shadow.shadow_id === serie.shadow_id) {
-                            sortedSeries.diffPressure.push(serie)
                         }
                     }
                 }
@@ -350,7 +358,7 @@ class App extends React.Component {
             <Row>
                 {/* <Button onClick={this.handleClick}>this.state :) </Button> */}
 
-                <Col lg={12}>
+                <Col lg={12} className={this.state.sortedSeries && this.state.sortedSeries.normal.length > 0 ? null : 'hidden'}>
                     <Card className="mb-3">
                         <Card.Header>Temperature </Card.Header>
                         <Card.Body>
@@ -362,7 +370,7 @@ class App extends React.Component {
                 </Col>
 
 
-                <Col lg={12}>
+                <Col lg={12} className={this.state.sortedSeries && this.state.sortedSeries.CO2.length > 0 ? null : 'hidden'}>
                     <Card className="mb-3">
                         <Card.Header>CO2 </Card.Header>
                         <Card.Body>
@@ -371,7 +379,7 @@ class App extends React.Component {
 
                     </Card>
                 </Col>
-                <Col lg={12}>
+                <Col lg={12} className={this.state.sortedSeries && this.state.sortedSeries.humidity.length > 0 ? null : 'hidden'}>
                     <Card className="mb-3">
                         <Card.Header>Humidity </Card.Header>
                         <Card.Body>

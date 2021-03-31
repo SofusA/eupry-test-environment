@@ -17,7 +17,7 @@ export default class SettingsButton extends Component {
     }
 
     setSettings = (shadow) => {
-        let checks = { normal: true, CO2: false, diffPressure: false };
+        let checks = { normal: true, CO2: false, humidity: false };
         this.setState({
             shadows: {
                 ...this.state.shadows,
@@ -57,7 +57,6 @@ export default class SettingsButton extends Component {
         if (!equal(this.props, prevProps)) {
             this.loadSettings()
         }
-
     }
 
     handleUnitCheckboxes = (shadow_id, type) => {
@@ -113,8 +112,8 @@ export default class SettingsButton extends Component {
                     <tr key={"settingsButton" + datalogger.shadow_id}>
                         <td>{datalogger.device_name}</td>
                         {!this.state.shadows[datalogger.shadow_id] ? null : <td><input type='checkbox' checked={this.state.shadows[datalogger.shadow_id].normal} id={datalogger.device_name + "_normal"} onChange={event => this.handleUnitCheckboxes(datalogger.shadow_id, "normal")} /></td>}
+                        {!this.state.shadows[datalogger.shadow_id] ? null : <td><input type='checkbox' checked={this.state.shadows[datalogger.shadow_id].humidity} id={datalogger.device_name + "humidity"} onChange={event => this.handleUnitCheckboxes(datalogger.shadow_id, "humidity")} /></td>}
                         {!this.state.shadows[datalogger.shadow_id] ? null : <td><input type='checkbox' checked={this.state.shadows[datalogger.shadow_id].CO2} id={datalogger.device_name + "_CO2"} onChange={event => this.handleUnitCheckboxes(datalogger.shadow_id, "CO2")} /></td>}
-                        {!this.state.shadows[datalogger.shadow_id] ? null : <td><input type='checkbox' checked={this.state.shadows[datalogger.shadow_id].diffPressure} id={datalogger.device_name + "_diffPressure"} onChange={event => this.handleUnitCheckboxes(datalogger.shadow_id, "diffPressure")} /></td>}
                     </tr>
                 )
             })
@@ -132,9 +131,9 @@ export default class SettingsButton extends Component {
                         <thead>
                             <tr>
                                 <th>Logger</th>
-                                <th>Normal</th>
+                                <th>Temperature</th>
+                                <th>Humidity</th>
                                 <th>CO2</th>
-                                <th>Differential Pressure</th>
                             </tr>
                         </thead>
                         <tbody>
