@@ -2,6 +2,6 @@
 
 sudo docker stop node-red
 sudo certbot renew
-sudo cp /etc/letsencrypt/live/test2020.eupry.com/privkey.pem ~/fingeraftryk/server/certs
-sudo cp /etc/letsencrypt/live/test2020.eupry.com/fullchain.pem ~/fingeraftryk/server/certs
+sudo cp /etc/letsencrypt/live/betatest.eupry.com/privkey.pem ~/eupry-test-environment/server/certs
+sudo cp /etc/letsencrypt/live/betatest.eupry.com/fullchain.pem ~/eupry-test-environment/server/certs
 sudo docker start node-red
